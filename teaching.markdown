@@ -2,7 +2,6 @@
 layout: post
 title:  "Teaching and Notes"
 date:   2020-06-26 16:25:17 -0700
-categories: jekyll update
 ---
 # Teaching
 

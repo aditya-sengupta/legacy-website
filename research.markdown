@@ -2,7 +2,6 @@
 layout: post
 title:  "Research"
 date:   2020-06-26 16:25:17 -0700
-categories: jekyll update
 ---
 ## Tip-Tilt Control
 I worked with Dr. Rebecca Jensen-Clem on an improved algorithm to control the tip and tilt modes of adaptive optics telescope systems. I discussed the work at the Center for Adaptive Optics Fall Retreat, 2019, and am currently working on testing the algorithm on an AO testbench.

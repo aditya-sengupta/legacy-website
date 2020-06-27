@@ -2,7 +2,6 @@
 layout: post
 title:  "Projects"
 date:   2020-06-26 16:25:17 -0700
-categories: jekyll update
 ---
 ## ULab Physics and Astronomy: Curriculum
 I am the 2020-21 curriculum chair for the Physics and Astronomy Division of Undergraduate Lab @ Berkeley, an organization that introduces students to techniques and skills used in physics research. I am writing and supervising the creation of modules on introductory programming for science, Git, research literacy, LaTeX, and academic communication.
