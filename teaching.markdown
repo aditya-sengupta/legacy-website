@@ -3,20 +3,21 @@ layout: post
 title:  "Teaching and Notes"
 date:   2020-06-26 16:25:17 -0700
 ---
-# Teaching
+### Teaching
 
 ## EECS 126: Probability and Random Processes
 I will be a TA for EECS 126 in Fall 2020, and in Spring 2020 I designed the Kalman Filtering lab assignment, walking students through the implementation and applications of the Kalman filter. (picture of that)
-<link to current teaching notes page>
+
+My current teaching page is [here](eecs126.html).
 
 ## Math 53: Multivariable Calculus
 I was a Math 53 Study Group Facilitator at the UC Berkeley Student Learning Center in Spring 2020. I designed worksheets for and taught a twice-weekly problem solving study group section, as well as teaching midterm and final review sections.
-<link to worksheets>
+(link to worksheets)
 
 ## Tutoring
 I have been working at the Student Learning Center as a mathematics tutor since Spring 2018, and have also tutored for CS 61BL, Data Structures and Programming Methodology.
 
-# Expository Papers and Course Notes
+### Expository Papers and Course Notes
 
 I like creating notes on content that I learn about (from my classes or otherwise) and that I’d like to understand better. This section includes a few of these.
 
