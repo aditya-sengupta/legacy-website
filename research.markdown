@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: page
 title:  "Research"
 date:   2020-06-26 16:25:17 -0700
 ---

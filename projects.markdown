@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: page
 title:  "Projects"
 date:   2020-06-26 16:25:17 -0700
 ---
@@ -22,4 +22,4 @@ Github for my first-principles rocket simulation
 ## Custom LaTeX
 I use LaTeX for all my course notes and homework assignments, and I’ve packaged my custom environments and style so they can be easily imported into a new TeX file.
 
-Github
+[Github](https://github.com/aditya-sengupta/latex-lectures)
