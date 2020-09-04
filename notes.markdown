@@ -6,6 +6,7 @@ date:   2020-06-26 16:25:17 -0700
 
 I like creating notes on content that I learn about (from my classes or otherwise) and that I’d like to understand better. This section includes a few of these.
 
+- [A one-page introduction to Gaussian Processes, made in advance of the (//online.tess.science) virtual meeting](expository/gp_onepage.pdf)
 - [My super-compact cheat sheet for CS 189, Introduction to Machine Learning](expository/CS189_Cheat_Sheet_Master.pdf)
 - [An informally-written introduction to Jordan canonical form, introduced in Math 110](expository/jordan_intuitive.pdf)
 - [An introduction to adjoints and inner product spaces, also for Math 110](expository/adjoints_ips.pdf)
