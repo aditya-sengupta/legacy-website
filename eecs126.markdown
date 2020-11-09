@@ -20,3 +20,7 @@ Click [here](https://tinyurl.com/yy79f8au) for my feedback form, to let me know 
 [Discussion 6 Notes](eecs126disnotes/126fa20dis6notes.pdf)
 
 [Discussion 8 Notes](eecs126disnotes/126fa20dis8notes.pdf)
+
+[Discussion 9 Notes](eecs126disnotes/126fa20dis9notes.pdf)
+
+[Discussion 10 Notes](eecs126disnotes/126fa20dis10notes.pdf)
