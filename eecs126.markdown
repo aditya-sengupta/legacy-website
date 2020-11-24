@@ -7,6 +7,10 @@ Click [here](https://tinyurl.com/yy79f8au) for my feedback form, to let me know 
 
 [Markov Chains in TeX](expository/markovtex.pdf)
 
+[KF Derivation/Intuition](eecs126disnotes/kf_derivation_intuition.pdf)
+
+[Vector KF Derivation](eecs126disnotes/vector_kf_derivation.pdf)
+
 [Discussion 1 Notes](eecs126disnotes/126fa20dis1notes.pdf)   
 
 [Discussion 2 Notes](eecs126disnotes/126fa20dis2notes.pdf)
@@ -26,3 +30,7 @@ Click [here](https://tinyurl.com/yy79f8au) for my feedback form, to let me know 
 [Discussion 10 Notes](eecs126disnotes/126fa20dis10notes.pdf)
 
 [Discussion 11 Notes](eecs126disnotes/126fa20dis11notes.pdf)
+
+[Discussion 12 Notes](eecs126disnotes/126fa20dis12notes.pdf)
+
+[Discussion 13 Notes](eecs126disnotes/126fa20dis13notes.pdf)
