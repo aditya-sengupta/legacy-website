@@ -15,9 +15,9 @@ I like creating notes on content that I learn about (from my classes or otherwis
 - [A near-direct transcription of two Physics 5A lectures, introducing special relativity](expository/Relativity.pdf)
 - [A guide to Einstein summation notation, due to my complete confusion in the first Physics 105 lecture](expository/einstein.pdf)
 
-Here are my course notes from many of the classes I’ve taken at Berkeley! EECS 126 is omitted here, in favour of being released to students currently taking the course.
+Here are my course notes from many of the classes I’ve taken at Berkeley!
 
 - **Math**: [Calculus II](notes/math1b.pdf), [Multivariable Calculus](notes/math53.pdf), [Linear Algebra and Differential Equations](notes/math54.pdf), [Introduction to Abstract Algebra](notes/math113.pdf), [Introduction to Analysis](notes/math104.pdf), [Linear Algebra II](notes/math110.pdf)
 - **Physics**: [Introductory Thermo/Quantum](notes/physics5c.pdf), [Analytic Mechanics](notes/physics105.pdf), [Electromagnetism and Optics (partial)](notes/physics110a.pdf), [Quantum Mechanics I](notes/physics137a.pdf)
-- **EECS**: [Signals and Systems](notes/ee120.pdf), [Feedback Control Systems](notes/eec128.pdf), [Optical Engineering](notes/ee118.pdf), [Information Theory and Coding](notes/ee229a.pdf)
+- **EECS**: [Signals and Systems](notes/ee120.pdf), [Feedback Control Systems](notes/eec128.pdf), [Optical Engineering](notes/ee118.pdf), [Probability and Random Processes](notes/eecs126.pdf), [Information Theory and Coding](notes/ee229a.pdf)
 - **Misc**: [Properties of Materials](notes/mse45.pdf)
