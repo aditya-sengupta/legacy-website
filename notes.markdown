@@ -6,7 +6,7 @@ date:   2020-06-26 16:25:17 -0700
 
 I like creating notes on content that I learn about (from my classes or otherwise) and that I’d like to understand better. This section includes a few of these.
 
-- [Exploring the need for image restoration in optics](expository/phase_exposition.jl.html) and [the corresponding Pluto.jl notebook](expository/phase_exposition.jl)
+- [Exploring the need for image restoration in optics](expository/phase_exposition.jl.html)
 - [My demonstration of LQG control on a toy problem](expository/control_exposition.pdf)
 - [My slide deck introducing Julia for research programming](https://docs.google.com/presentation/d/1dvmnb5LJZTLZgEIhNHKpEvHhDMYvOkrQkkzFqFFNges/edit#slide=id.g9b606c9917_0_203)
 - [A one-page introduction to Gaussian Processes, made in preparation for the online.tess.science virtual meeting](expository/gp_onepage.pdf)
