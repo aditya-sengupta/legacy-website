@@ -33,9 +33,9 @@ We’ll use the convention that if a cell is empty, that’s represented in the 
 If we print this, we’ll get a 9x9 grid of numbers separated by spaces - not bad, but I’d like to separate out the blocks and see the puzzle more cleanly. So let’s add in a function to make printing a bit more legible!
 
 To do this, I can go row by row, column by column, and print each number, except:
-At the end of each row, I want to move to a new line
-Every third number in a row, I want a vertical separator |
-After every three rows, I want a row of horizontal separators -
+1. At the end of each row, I want to move to a new line
+2. Every third number in a row, I want a vertical separator |
+3. After every three rows, I want a row of horizontal separators -
 
 For that, I want to go over each row (counting as I go), and within that each element (also counting as I go), printing, and doing something extra. After a little experimenting with the spacing, I got all of it:
 <script src="https://gist.github.com/aditya-sengupta/1d8e5ff5a359f9817188d986ae8a5363.js"></script>
@@ -142,6 +142,7 @@ Now we have to implement the two constraints! To start with the first one, I wro
     - minus any values in the row
     - minus any values in the column
     - minus any values in the block.
+    
 <script src="https://gist.github.com/aditya-sengupta/089054d03d7cbf33f8cc12188c2df4a7.js"></script>
 
 From there, writing the first constraint just needs us to loop over every cell (indices 1 to 9 along the rows and the columns).
