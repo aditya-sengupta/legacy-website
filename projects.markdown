@@ -3,6 +3,9 @@ layout: page
 title:  "Projects"
 date:   2020-06-26 16:25:17 -0700
 ---
+## CircuitModels.jl
+As my final project for EECS 219A, "Numerical Simulation and Modeling", in Spring 2021, I created the Julia package [CircuitModels.jl](CircuitModels)
+
 ## SparseTransforms.jl
 As my final project for EECS 229A, "Information Theory and Coding", in Fall 2020, I co-created the Julia package [SparseTransforms.jl](https://github.com/aditya-sengupta/SparseTransforms.jl), an open-source implementation of the SPRIGHT sparse Walsh-Hadamard transform algorithm (and possibly soon FFAST, the equivalent for the Fourier transform). We implemented the algorithm, profiled different options within it, and developed some extensions.
 
