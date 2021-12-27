@@ -220,7 +220,7 @@ There’s a few things I didn’t like about how I did this.
 
 Both of these can be resolved by introducing a fixed data structure for the possibilities, which I’ll call the `flags` matrix. This is a 9x9x9 matrix, so it’s three-dimensional, and all its values are booleans: either true or false. `flags[i,j,k]` represents whether the grid value `[i,j]` could contain the value `k`.
 
-<script src="https://gist.github.com/aditya-sengupta/c177b10ec09ff93c80a71e739a6058ec.js"></script>
+<script src="https://gist.github.com/aditya-sengupta/62e5beee6b400615d6d1e113100174c6.js"></script>
 
 This solves our problems:
 1. No more “possibilities” function - we replace it by indexing into `flags[i,j,:]` and reading off which indices are and aren’t possible!
@@ -230,13 +230,16 @@ I rewrote my solver using this and it still worked! I won’t repeat all the sol
 
 Some of the pain points with this rewrite were keeping `grid` updated concurrently with `flags`, and passing around `flags` to all the different functions. I realized there was an easy solution to this: just get rid of the grid of numbers entirely! 
 
-<script src="https://gist.github.com/aditya-sengupta/62e5beee6b400615d6d1e113100174c6.js"></script>
+<script src="https://gist.github.com/aditya-sengupta/c177b10ec09ff93c80a71e739a6058ec.js"></script>
 
 `flags` has all the information about the puzzle, and you get to keep just one thing fully updated instead of two. To generate the grid for printing, there’s the following neat idea: `flags` separates out into 3D layers, where layer *k* is basically “true if *k* is here and false otherwise”, meaning *k* multiplied by layer *k* in a solved puzzle is the entire contribution of the number *k*. So to print, what we do is:
 - Make a mask with 1s where we’ve got a solution and 0s where we don’t
 - Print out the mask multiplied by the sum of (1 * flags[:,:,1] + 2 * flags[:,:,2] + … + 9 * flags[:,:,9])
 
 (As unpopular as 1-indexing is, it’s helped me pull off a few nice tricks like this one!)
+
+<script src="https://gist.github.com/aditya-sengupta/9108c54f21b0860ba3f50d7c6cf6c15e.js"></script>
+
 If you write this and test out an example, you would notice something interesting:
 ```
 julia> p = Sudoku([
