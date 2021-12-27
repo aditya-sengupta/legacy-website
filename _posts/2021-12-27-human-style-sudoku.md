@@ -4,8 +4,6 @@ title: Being My Rubber Duck - Human-Style Sudoku Solving
 category: Coding
 ---
 
-This is my attempt at what I hope could be a series of posts, where I talk through my process for doing something computational. If you like seeing problems being broken down and solved, whether you’re learning to do this, experienced with it, or just otherwise curious, I hope this is of interest! 
-
 I like solving Sudokus, but I’m not that great at them - my strategy mostly involves the following steps:
 
 1. Fill in anything I see immediately.
@@ -34,7 +32,7 @@ If we print this, we’ll get a 9x9 grid of numbers separated by spaces - not ba
 
 To do this, I can go row by row, column by column, and print each number, except:
 1. At the end of each row, I want to move to a new line
-2. Every third number in a row, I want a vertical separator |
+2. Every third number in a row, I want a vertical separator <code>&#124;</code>
 3. After every three rows, I want a row of horizontal separators -
 
 For that, I want to go over each row (counting as I go), and within that each element (also counting as I go), printing, and doing something extra. After a little experimenting with the spacing, I got all of it:
@@ -368,3 +366,5 @@ julia> @time solve!(Sudoku(puzzles[4]))
 ## Conclusion
 
 I’ve had a great time coming up with software design plans and working out the logic for how this solver should work. There’s still ways to optimize it further - most obviously, making the guessing step better - but I’m happy with how it works and hope it’s a useful reference!
+
+This is my attempt at what I hope could be a series of posts, where I talk through my process for doing something computational. If you like seeing problems being broken down and solved, whether you’re learning to do this, experienced with it, or just otherwise curious, I hope this is of interest! 
