@@ -14,7 +14,7 @@ This isn’t a very satisfying way to do a puzzle, so I set out to understand it
 
 While there’s fast Sudoku solvers out there already, I’ve got a more specific goal with mine: to generate a list of steps that a human could follow to see the path to the solution. It’s possibly most natural to a computer to express Sudoku as a boolean satisfiability or integer programming problem, but that’s not how a human would think about it. There’s also articles out there on how to solve them algorithmically, but I won’t consult them either except for images. The journey’s more important to us than the destination!
 
-I’ll be using the Julia programming language and pasting code snippets here, but hopefully nothing depends too heavily on language specifics. If you’d like to run the code, take a look at the GitHub! My code snippets here will be out of order and messy for the purposes of actually running anything, so it’s best to look on there, where I’ve structured it better and it’ll be actually runnable.
+I’ll be using the Julia programming language and pasting code snippets here, but hopefully nothing depends too heavily on language specifics. If you’d like to run the code, take a look at the [GitHub](https://github.com/aditya-sengupta/SudokuHuman.jl)! My code snippets here will be out of order and messy for the purposes of actually running anything, so it’s best to look on there, where I’ve structured it better and it’ll be actually runnable.
 
 ## Setting everything up
 
