@@ -5,9 +5,9 @@
 layout: home
 ---
 
-Hi! I'm Aditya, an astronomer interested in all the mathematical, computational, and engineering problems we solve so we can learn about space! I'm currently a student in the Part III MASt in Applied Mathematics at the University of Cambridge, as a postgraduate student in Girton College. After that, I plan to pursue a PhD in Astronomy. My primary interests are in astronomical instrumentation, photometry for exoplanet detection and characterization, and statistical methods for astronomical inference problems.
+Hi! I'm Aditya, an astronomer interested in all the mathematical, computational, and engineering problems we solve so we can learn about space! I'm currently a PhD student in the Astronomy and Astrophysics department at UC Santa Cruz, where I'm being advised by Prof. Jonathan Fortney and Prof. Rebecca Jensen-Clem. My primary interests are in astronomical instrumentation, efficient computation for exoplanet atmosphere models, and statistical methods for astronomical inference problems.
 
-I recently graduated from UC Berkeley, where I double-majored in Engineering Physics and Engineering Mathematics and Statistics. I've worked with Prof. Courtney Dressing on exoplanet occurrence rates and point-spread-function photometry, and with Prof. Rebecca Jensen-Clem at UC Santa Cruz on control systems and sensor simulations for telescope adaptive optics systems. 
+Previously, I earned a Master of Advanced Study degree in Applied Mathematics from Girton College, University of Cambridge, where I wrote a review essay on cloud models for exoplanet atmospheres under Prof. Nikku Madhusudhan. I graduated from UC Berkeley in 2021, where I double-majored in Engineering Physics and Engineering Mathematics and Statistics. There, I worked with Prof. Courtney Dressing on exoplanet occurrence rates and point-spread-function photometry, and with Prof. Rebecca Jensen-Clem at UC Santa Cruz on control systems and sensor simulations for telescope adaptive optics systems. 
 
 I enjoy teaching and creating educational resources: check out the Expository Papers tab for some of what I've made!
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Being My Rubber Duck - Human-Style Sudoku Solving
-category: Coding
+category: blog
 ---
 
 This is my attempt at what I hope could be a series of posts, where I talk through my process for doing something computational. If you like seeing problems being broken down and solved, whether you’re learning to do this, experienced with it, or just otherwise curious, I hope this is of interest! 

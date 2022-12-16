@@ -1,4 +1,9 @@
-# CircuitModels.jl
+---
+layout: post
+title: CircuitModels.jl
+category: blog
+---
+
 Circuit modeling and DAE setup in Julia. This code is largely based on the MAPP prototyping platform and the MNA equation engine written by Prof. Jaijeet Roychowdhury's group.
 This package was originally written as a final project for EECS 219A at UC Berkeley in Spring 2021.
 

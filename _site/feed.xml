@@ -1,1 +1,612 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-27T00:31:51-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Aditya Sengupta</title><subtitle>Personal website for Aditya Sengupta.</subtitle></feed>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.1.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2022-12-16T00:42:09-08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Aditya Sengupta</title><subtitle>Personal website for Aditya Sengupta.</subtitle><entry><title type="html">Being My Rubber Duck - Human-Style Sudoku Solving</title><link href="http://localhost:4000/coding/2021/12/27/human-style-sudoku.html" rel="alternate" type="text/html" title="Being My Rubber Duck - Human-Style Sudoku Solving" /><published>2021-12-27T00:00:00-08:00</published><updated>2021-12-27T00:00:00-08:00</updated><id>http://localhost:4000/coding/2021/12/27/human-style-sudoku</id><content type="html" xml:base="http://localhost:4000/coding/2021/12/27/human-style-sudoku.html">&lt;p&gt;This is my attempt at what I hope could be a series of posts, where I talk through my process for doing something computational. If you like seeing problems being broken down and solved, whether you’re learning to do this, experienced with it, or just otherwise curious, I hope this is of interest!&lt;/p&gt;
+
+&lt;p&gt;I like solving Sudokus, but I’m not that great at them - my strategy mostly involves the following steps:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Fill in anything I see immediately.&lt;/li&gt;
+  &lt;li&gt;Stare at the puzzle for ten to thirty minutes before I see something else.&lt;/li&gt;
+  &lt;li&gt;Repeat 1-2 till solved.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;This isn’t a very satisfying way to do a puzzle, so I set out to understand it better by writing a program that implements my method! In this way, I can hopefully figure out what it is I’m seeing, and develop some new ways of solving puzzles.&lt;/p&gt;
+
+&lt;p&gt;While there’s fast Sudoku solvers out there already, I’ve got a more specific goal with mine: to generate a list of steps that a human could follow to see the path to the solution. It’s possibly most natural to a computer to express Sudoku as a boolean satisfiability or integer programming problem, but that’s not how a human would think about it. There’s also articles out there on how to solve them algorithmically, but I won’t consult them either except for images. The journey’s more important to us than the destination!&lt;/p&gt;
+
+&lt;p&gt;I’ll be using the Julia programming language and pasting code snippets here, but hopefully nothing depends too heavily on language specifics. If you’d like to run the code, take a look at the GitHub! My code snippets here will be out of order and messy for the purposes of actually running anything, so it’s best to look on there, where I’ve structured it better and it’ll be actually runnable.&lt;/p&gt;
+
+&lt;h2 id=&quot;setting-everything-up&quot;&gt;Setting everything up&lt;/h2&gt;
+
+&lt;p&gt;As a quick refresher, a Sudoku consists of a 9x9 grid, subdivided into nine 3x3 blocks, with cells each containing one of the integers 1-9. In the completed puzzle, each column, row, and block contains each of the integers 1-9 exactly once. Solving the puzzle consists of repeatedly applying constraints (“I’ve got 1, 2, 4, 5, 6, 7, 8, 9 in this row, and one space left, so it has to be 3” and so on) until all 81 cells have been filled.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://cpb-ap-se2.wpmucdn.com/blogs.unimelb.edu.au/dist/3/41/files/2016/10/sudoku-p14bi6.png&quot; alt=&quot;A sample Sudoku and its solution&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We’re trying to express this in code, so let’s start off with a matrix representing the board.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/cb0385eb761897d24deac3475df32875.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;We’ll use the convention that if a cell is empty, that’s represented in the matrix by a 0.&lt;/p&gt;
+
+&lt;p&gt;If we print this, we’ll get a 9x9 grid of numbers separated by spaces - not bad, but I’d like to separate out the blocks and see the puzzle more cleanly. So let’s add in a function to make printing a bit more legible!&lt;/p&gt;
+
+&lt;p&gt;To do this, I can go row by row, column by column, and print each number, except:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;At the end of each row, I want to move to a new line&lt;/li&gt;
+  &lt;li&gt;
+    &lt;table&gt;
+      &lt;tbody&gt;
+        &lt;tr&gt;
+          &lt;td&gt;Every third number in a row, I want a vertical separator&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+  &lt;/li&gt;
+  &lt;li&gt;After every three rows, I want a row of horizontal separators -&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;For that, I want to go over each row (counting as I go), and within that each element (also counting as I go), printing, and doing something extra. After a little experimenting with the spacing, I got all of it:
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/1d8e5ff5a359f9817188d986ae8a5363.js&quot;&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;This lets me look at the puzzle in my terminal like this!&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; p = Sudoku([
+           9 3 0 0 0 0 0 4 0
+           0 0 0 0 4 2 0 9 0
+           8 0 0 1 9 6 7 0 0
+           0 0 0 4 7 0 0 0 0
+           0 2 0 0 0 0 0 6 0
+           0 0 0 0 2 3 0 0 0
+           0 0 8 5 3 1 0 0 2
+           0 9 0 2 8 0 0 0 0
+           0 7 0 0 0 0 0 5 3
+           ]);
+
+julia&amp;gt; p
+  -----   -----   -----
+| 9 3 - | - 5 - | - 4 - |
+| - - - | - 4 2 | - 9 - |
+| 8 - - | 1 9 6 | 7 - 5 |
+  -----   -----   -----
+| - - - | 4 7 - | - - - |
+| - 2 - | - - - | - 6 - |
+| - - - | - 2 3 | - - - |
+  -----   -----   -----
+| - - 8 | 5 3 1 | - 7 2 |
+| - 9 - | 2 8 - | - - - |
+| - 7 - | - 6 - | - 5 3 |
+  -----   -----   -----
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;identifying-solved-puzzles&quot;&gt;Identifying solved puzzles&lt;/h2&gt;
+&lt;p&gt;We could jump into solving from here, but first, let’s figure out when to stop. How does our program know when a puzzle is done? A quick way is to just check that there’s no 0s anywhere, but if that’s all we did, we could get false positives: maybe we filled in something wrong, but the program would mark it as correct because we put in a non-0 value there. Instead, we want to check that each (row, column, block) has all of 1-9 in it as well as there being no 0s.&lt;/p&gt;
+
+&lt;p&gt;An easy way to do this kind of check for duplicate values is to pass the subarray into a set, which removes any duplicates, and check that the size of that set is the same as that of the subarray. This gives us our first “check” method that we can call on any sub-region, and we can get the main one just by iterating over that first method for all rows, columns, and blocks.&lt;/p&gt;
+
+&lt;p&gt;To iterate over blocks, I added a new method named eachblock analogous to eachrow and eachcol that does what it sounds like. I’ll skip over how it works, but take a look on the main GitHub if you’d like!&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/f8ac9a291b88eba66619f2473188853e.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;By having two methods with the same name but different arguments, I’m using a Julia feature called multiple dispatch - here this mostly helps me with legibility/natural naming, but in other cases it can make the functionality better too!&lt;/p&gt;
+
+&lt;h2 id=&quot;solving-techniques&quot;&gt;Solving techniques&lt;/h2&gt;
+
+&lt;p&gt;Now for the main event! We start off with a grid with some 0s and some known numbers in it, and we have to figure out how to substitute in the real numbers. That means applying constraints the way we manually do it.&lt;/p&gt;
+
+&lt;p&gt;There’s two ways I figure out a number in a Sudoku:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;For a particular cell, is there only one possible value?&lt;/li&gt;
+  &lt;li&gt;In a particular region, is there only one cell that could have a certain value?&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;  -----   -----   -----
+| 9 3 - | - 5 - | - 4 - |
+| - - - | - 4 2 | - 9 - |
+| 8 - - | 1 9 6 | 7 - 5 |
+  -----   -----   -----
+| - - - | 4 7 - | - - - |
+| - 2 - | - - - | - 6 - |
+| - - - | - 2 3 | - - - |
+  -----   -----   -----
+| - - 8 | 5 3 1 | - 7 2 |
+| - 9 - | 2 8 - | - - - |
+| - 7 - | - 6 - | - 5 3 |
+  -----   -----   -----
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;To illustrate both of these, let’s take a look at the puzzle I brought up earlier.&lt;/p&gt;
+
+&lt;p&gt;For the first constraint, the cell in the top-middle of the top-middle block (above the 4 which is itself above the 9) can only be a 5. We can eliminate 1, 2, 4, 6, 9 because they share a block, which leaves 3, 5, 7, 8. Looking down the column, we see a 3, 7, 8 (and an extra 3 in the row for good measure), meaning there’s no possibilities for that square other than 5. This second constraint is how we’ll start solving the puzzle really fast as soon as we’ve made some progress: as we fill in more, the possibilities for each cell get whittled down, and soon every cell can be filled in for sure!&lt;/p&gt;
+
+&lt;p&gt;An example of the second constraint would be: the only cell in the middle block that could be a 6 is the lower left one. There has to be a 6 somewhere in there, but it can’t be in the middle row because of the 6 in the center of the middle-right block, and it can’t be in the rightmost column because of the 6 in the bottom-right of the top-middle block. So there’s only one cell remaining. (If you’d like, try and spot some more constraints like this!)&lt;/p&gt;
+
+&lt;p&gt;So how do we tell our program to do this? It’s helpful to think of the overall logic before we get into details. When we’re writing a function called “solve”, we might want it to do something like this:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Start with a grid&lt;/li&gt;
+  &lt;li&gt;Apply constraint 1 to fill in all forced values in a region&lt;/li&gt;
+  &lt;li&gt;Apply constraint 2 to fill in all forced cell values&lt;/li&gt;
+  &lt;li&gt;Return what we get&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This is a good start, but we really want to apply both constraints multiple times: each time we apply the constraints, we get more information, and that can help us narrow down more possibilities.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Start with a grid&lt;/li&gt;
+  &lt;li&gt;Loop:
+    &lt;ul&gt;
+      &lt;li&gt;Apply constraint 1 to fill in all forced cell values&lt;/li&gt;
+      &lt;li&gt;Apply constraint 2 to fill in all forced values in a region&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Return what we get&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;When do we end this loop? We could say when the puzzle’s solved, i.e. when our “check” function returns true, but maybe we run into some puzzles where this won’t do it, and in those cases we would infinitely loop. There’s a few different ways to avoid this. What I went with is adding in a boolean that keeps track of whether we actually added any new values in a loop, and returning what we have if we didn’t. This covers both our cases:
+If we’ve got a complete puzzle, we won’t add anything in our last loop, because there’s nothing to add.
+If we’re stuck and can’t figure out anything more, this’ll successfully catch that and return us out.&lt;/p&gt;
+
+&lt;p&gt;This gives us the code for our first solver:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/862a3b750edc584d2ee131771c7b8176.js&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;writing-the-constraints&quot;&gt;Writing the constraints&lt;/h2&gt;
+
+&lt;p&gt;Now we have to implement the two constraints! To start with the first one, I wrote a function that gets the list of possible values given a cell index using the rule:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;If it’s already filled in, the only possibility is the actual value&lt;/li&gt;
+  &lt;li&gt;If it’s 0, then the possible values are 1 to 9
+    &lt;ul&gt;
+      &lt;li&gt;minus any values in the row&lt;/li&gt;
+      &lt;li&gt;minus any values in the column&lt;/li&gt;
+      &lt;li&gt;minus any values in the block.&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/089054d03d7cbf33f8cc12188c2df4a7.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;From there, writing the first constraint just needs us to loop over every cell (indices 1 to 9 along the rows and the columns).&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/d16bcee6ae6c25c8bbea6f77400276c5.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;The second constraint is trickier, and it took me a few iterations of trying out index combinations and different designs before I got one that worked. To start with, we know we’re doing this check for each region (row, column, block), so we should loop over those.&lt;/p&gt;
+
+&lt;p&gt;Within that, we’ll make use of our “possibilities” function again. For each of the nine cells in our region, let’s list the possibilities, and see if there’s any value that only shows up in one spot. To do that, I’ll make a possibilities matrix, where each cell in the matrix is itself a vector of the possible values. That sounds confusing, so here’s a possible top-left corner of this matrix:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;    [1]     [2, 3, 9]    [3, 5, 8]
+    [6]     [2, 7, 9]    [5, 7, 8]
+    [3, 8]  [2, 3, 4, 9] [3, 8]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In this puzzle, we know 1 and 6 for sure (either a first type of constraint, or something we already knew), and we’re also able to figure out 4, because the bottom middle is the only place it could go (a second type of constraint).&lt;/p&gt;
+
+&lt;p&gt;Telling a computer to do what I just did by eye turns out to be a bit annoying. We can do it as follows:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;For each value 1-9, “fish” for the value, by looking up all the cells that could have it. With indices in the order they are on a phone keypad, the “fishing” in this case turns up
+&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[[1], [2, 5, 8], [2, 3, 7, 8, 9], [8], [3, 6], [4], [5, 6], [3, 6, 7, 9], [2, 5, 8]]&lt;/code&gt;
+where the array at index &lt;em&gt;i&lt;/em&gt; is all the places that the number &lt;em&gt;i&lt;/em&gt; could be.&lt;/li&gt;
+  &lt;li&gt;If any of the “fishing” arrays have length 1 and have a value in the grid, note them as already discovered - here, we’ve already discovered that 1 is at 1 and 6 is at 4.&lt;/li&gt;
+  &lt;li&gt;If there’s any remaining “fishing” arrays with length 1, put them in the grid and mark them as a new value. This process finds that 4 has to be at 8.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A more advanced thing to note about our example here is that once we’ve figured out where 4 goes, both 2 and 9 are constrained to the middle column. This means 7 can’t go in position 5 and 3 can’t go in position 6, because otherwise we wouldn’t have room for both 3 and 9. This is a bit much to have our program notice for now, but could be useful when we find we need more inference capabilities!&lt;/p&gt;
+
+&lt;p&gt;Here’s what that looks like in code! It’s admittedly a lot, but we’ll figure out a way to deal with that later.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/73f9e1ab82557b1ddbbfd4d96afc0e21.js&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;our-first-full-solver&quot;&gt;Our first full solver!&lt;/h2&gt;
+
+&lt;p&gt;Putting all of this together, we’ve got a solver! It’s not a perfect one - you can feed it a hard to expert level Sudoku, and it’ll get stuck halfway through - but it does work at least as well as my manual process does!&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; medium = Sudoku([
+           0 0 0 0 2 5 0 3 4
+           4 3 0 0 0 0 1 2 0
+           7 0 2 0 4 0 0 0 0
+           5 4 3 0 0 0 8 9 7
+           0 9 0 0 0 0 0 0 0
+           0 7 0 8 0 9 0 0 0
+           9 0 0 0 0 7 5 4 0
+           0 2 4 0 8 0 9 0 6
+           0 0 0 0 9 0 0 1 0
+           ]);
+
+julia&amp;gt; solve!(medium)
+  -----   -----   -----
+| 8 6 9 | 1 2 5 | 7 3 4 |
+| 4 3 5 | 6 7 8 | 1 2 9 |
+| 7 1 2 | 9 4 3 | 6 8 5 |
+  -----   -----   -----
+| 5 4 3 | 2 1 6 | 8 9 7 |
+| 1 9 8 | 7 5 4 | 2 6 3 |
+| 2 7 6 | 8 3 9 | 4 5 1 |
+  -----   -----   -----
+| 9 8 1 | 3 6 7 | 5 4 2 |
+| 3 2 4 | 5 8 1 | 9 7 6 |
+| 6 5 7 | 4 9 2 | 3 1 8 |
+  -----   -----   -----
+
+
+julia&amp;gt; check(ans)
+true
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;computational-inefficiencies&quot;&gt;Computational inefficiencies&lt;/h2&gt;
+
+&lt;p&gt;There’s a few things I didn’t like about how I did this.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Repeated calls to “possibilities”. I’ve set it up as though the possibilities could be anything over time, but really, it’ll only be some subset of (1-9), and that subset will get smaller as we solve until it’s just one number. I’ve written some very general code for something a lot more specific, and if we can use that structure, we could save on memory and time, which we’ll need if we’re going to solve those hard and expert puzzles!&lt;/li&gt;
+  &lt;li&gt;Constraint two basically just ran constraint one again in order to find out which values to disregard and which to update. Just because we think about these things separately when we’re doing it manually doesn’t mean we have to compute them twice!&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Both of these can be resolved by introducing a fixed data structure for the possibilities, which I’ll call the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags&lt;/code&gt; matrix. This is a 9x9x9 matrix, so it’s three-dimensional, and all its values are booleans: either true or false. &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags[i,j,k]&lt;/code&gt; represents whether the grid value &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;[i,j]&lt;/code&gt; could contain the value &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;k&lt;/code&gt;.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/c177b10ec09ff93c80a71e739a6058ec.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;This solves our problems:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;No more “possibilities” function - we replace it by indexing into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags[i,j,:]&lt;/code&gt; and reading off which indices are and aren’t possible!&lt;/li&gt;
+  &lt;li&gt;Running a constraint consists of just doing operations on “flags”, and there’s no longer a conceptual difference between a constraint-one value you just found and one you knew already - either way it’ll read as a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags[i,j,:]&lt;/code&gt; with only one “true” and eight “false”s.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;I rewrote my solver using this and it still worked! I won’t repeat all the solver code as a lot of that is similar, but I replaced each time I just substituted in a value to the grid with the following function that applies all its constraints as soon as it’s updated.&lt;/p&gt;
+
+&lt;p&gt;Some of the pain points with this rewrite were keeping &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;grid&lt;/code&gt; updated concurrently with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags&lt;/code&gt;, and passing around &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags&lt;/code&gt; to all the different functions. I realized there was an easy solution to this: just get rid of the grid of numbers entirely!&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/62e5beee6b400615d6d1e113100174c6.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags&lt;/code&gt; has all the information about the puzzle, and you get to keep just one thing fully updated instead of two. To generate the grid for printing, there’s the following neat idea: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;flags&lt;/code&gt; separates out into 3D layers, where layer &lt;em&gt;k&lt;/em&gt; is basically “true if &lt;em&gt;k&lt;/em&gt; is here and false otherwise”, meaning &lt;em&gt;k&lt;/em&gt; multiplied by layer &lt;em&gt;k&lt;/em&gt; in a solved puzzle is the entire contribution of the number &lt;em&gt;k&lt;/em&gt;. So to print, what we do is:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Make a mask with 1s where we’ve got a solution and 0s where we don’t&lt;/li&gt;
+  &lt;li&gt;Print out the mask multiplied by the sum of (1 * flags[:,:,1] + 2 * flags[:,:,2] + … + 9 * flags[:,:,9])&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;(As unpopular as 1-indexing is, it’s helped me pull off a few nice tricks like this one!)
+If you write this and test out an example, you would notice something interesting:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; p = Sudoku([
+           9 3 0 0 0 0 0 4 0
+           0 0 0 0 4 2 0 9 0
+           8 0 0 1 9 6 7 0 0
+           0 0 0 4 7 0 0 0 0
+           0 2 0 0 0 0 0 6 0
+           0 0 0 0 2 3 0 0 0
+           0 0 8 5 3 1 0 0 2
+           0 9 0 2 8 0 0 0 0
+           0 7 0 0 0 0 0 5 3
+           ])
+  -----   -----   -----
+| 9 3 - | - 5 - | - 4 - |
+| - - - | - 4 2 | - 9 - |
+| 8 - - | 1 9 6 | 7 - 5 |
+  -----   -----   -----
+| - - - | 4 7 - | - - - |
+| - 2 - | - - - | - 6 - |
+| - - - | - 2 3 | - - - |
+  -----   -----   -----
+| - - 8 | 5 3 1 | - 7 2 |
+| - 9 - | 2 8 - | - - - |
+| - 7 - | - 6 - | - 5 3 |
+  -----   -----   -----
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The process of building the Sudoku solved for a few values! The 5 in the top-middle block wasn’t there initially - it just comes up naturally as a result of constraint-one checking that now happens automatically as we build our flags matrix.&lt;/p&gt;
+
+&lt;p&gt;With this rewrite, everything changes: I have to go back to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;check&lt;/code&gt;, since we’re now just storing Booleans and not the actual values. One possible solution here is even simpler: we already made the mask before for printing, so we just check if that mask is true everywhere!&lt;/p&gt;
+
+&lt;p&gt;This should solve our problem. Since we do our checking for inconsistencies after each update so we can throw an error for malformed puzzles, if we’ve got a complete puzzle it must have passed those checks already. This gives us the wonderfully simple check function:&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/f6083e82fa3cd1dcdb310e4141a02173.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;On top of that, a lot of the processing we were doing with general integers now gets replaced with elementwise boolean operations! No need for a dictionary in the middle any more! Instead, in this formulation, what we’ve got is a 9x9 array of possibilities, where we know a value if it’s unique in its row or in its column (it’s a rook on a chessboard that isn’t under attack).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; 0  0  0  0  0  0  0  0  1
+ 1  0  0  0  1  1  1  0  0
+ 0  0  0  0  0  0  0  1  0
+ 1  0  1  0  1  1  0  0  0
+ 1  0  1  1  1  0  1  0  0
+ 1  0  0  1  1  1  1  0  0
+ 0  0  0  1  0  1  0  0  0
+ 1  0  1  1  1  1  0  0  0
+ 1  1  0  1  0  1  0  0  0
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Over here, the element in the last row at the second index is the only 1 in its column, but &lt;em&gt;not&lt;/em&gt; the only 1 in its row! That means we haven’t yet identified it, but it’s the only value in this region that could be a 2 (as indicated by the index) so we can set the rest of that row to 0s and keep going.&lt;/p&gt;
+
+&lt;p&gt;All of this gives us a new, incredibly simple, solver: it just “fishes” once per region, elementwise across the possibilities matrix, and it finds the indices like (9, 2) here that we can use to update our flags.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/f8cc46907785cad25e06936501f24b4e.js&quot;&gt;&lt;/script&gt;
+
+&lt;h2 id=&quot;generalizing-to-more-difficult-puzzles&quot;&gt;Generalizing to more difficult puzzles&lt;/h2&gt;
+
+&lt;p&gt;Now we come to a problem: I don’t really know how to solve Sudokus where the tactics I explained here don’t work. So as a first attempt at this, I decided to just throw a bunch of compute power at it!&lt;/p&gt;
+
+&lt;p&gt;When I don’t know how to proceed, I usually pick a cell with a small number of possibilities, pick one of its possible values, and run with it till I either solve everything, or reach an impossible state. I’ll just tell my computer to do that!&lt;/p&gt;
+
+&lt;p&gt;My algorithm for this is:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Go through the Sudoku and sort its indices by the number of possible values in there, ascending&lt;/li&gt;
+  &lt;li&gt;Pick the first unknown cell with the minimum number of possible values (usually 2)&lt;/li&gt;
+  &lt;li&gt;Pick one of the few values for it&lt;/li&gt;
+  &lt;li&gt;Try and solve as we’ve been doing (call “solve!”)
+    &lt;ul&gt;
+      &lt;li&gt;If it works, return it&lt;/li&gt;
+      &lt;li&gt;If it doesn’t, undo the puzzle update that we first did as a guess, and keep going with the next guess&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;If you ran through all guesses without reaching a solution (meaning one of the guesses was correct but led to a still-incomplete puzzle), move on to another guess&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We’ll further modify our original solver to call the guess-based solver if it fails, meaning we could get stuck in an infinite loop again. To break out of that, we’ll add a depth and maximum depth to the keyword arguments of solve!, and we’ll increment the depth each time. If we go past, say, three recursions, we’ll just give up.&lt;/p&gt;
+
+&lt;script src=&quot;https://gist.github.com/aditya-sengupta/e2e45fda4913c40f38059f529a97f1ef.js&quot;&gt;&lt;/script&gt;
+
+&lt;p&gt;I actually first did this when I still had the grid-based solver instead of the Boolean one, but it took many GB of memory and about two minutes for an expert-level puzzle, which wasn’t great. The benefit of going to data structures that are better optimized by the compiler, and algorithms that are more transparent, is that this process now works on the expert-level puzzles, in just a second or two and with only MB of memory!&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; Sudoku(puzzles[4])
+  -----   -----   -----
+| - 6 - | - 2 - | - 1 3 |
+| - - - | - - - | 2 - - |
+| - - - | - 1 - | - - - |
+  -----   -----   -----
+| - 8 - | - - - | 4 - - |
+| 7 - 4 | 8 9 - | - - 2 |
+| - 1 - | - - 7 | - - - |
+  -----   -----   -----
+| 9 - - | - - 8 | - - 5 |
+| - - 1 | - - 3 | - - 6 |
+| 4 - - | - 5 - | - - 1 |
+  -----   -----   -----
+
+
+julia&amp;gt; solve!(Sudoku(puzzles[4]), depth=3) # pretends you're at max depth and can't recurse
+  -----   -----   -----
+| - 6 - | - 2 - | - 1 3 |
+| 1 - - | - 8 - | 2 - - |
+| - - - | - 1 - | - - - |
+  -----   -----   -----
+| - 8 - | - - 1 | 4 - - |
+| 7 - 4 | 8 9 - | 1 - 2 |
+| - 1 - | - - 7 | - - - |
+  -----   -----   -----
+| 9 - - | 1 - 8 | - - 5 |
+| - - 1 | - - 3 | - - 6 |
+| 4 - - | - 5 - | - - 1 |
+  -----   -----   -----
+
+julia&amp;gt; @time solve!(Sudoku(puzzles[4]))
+  1.393290 seconds (14.46 M allocations: 666.199 MiB, 7.25% gc time)
+  -----   -----   -----
+| 5 6 8 | 7 2 4 | 9 1 3 |
+| 1 9 7 | 3 8 6 | 2 5 4 |
+| 3 4 2 | 5 1 9 | 6 8 7 |
+  -----   -----   -----
+| 6 8 5 | 2 3 1 | 4 7 9 |
+| 7 3 4 | 8 9 5 | 1 6 2 |
+| 2 1 9 | 4 6 7 | 5 3 8 |
+  -----   -----   -----
+| 9 2 6 | 1 7 8 | 3 4 5 |
+| 8 5 1 | 9 4 3 | 7 2 6 |
+| 4 7 3 | 6 5 2 | 8 9 1 |
+  -----   -----   -----
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;I’ve had a great time coming up with software design plans and working out the logic for how this solver should work. There’s still ways to optimize it further - most obviously, making the guessing step better - but I’m happy with how it works and hope it’s a useful reference!&lt;/p&gt;</content><author><name></name></author><category term="Coding" /><summary type="html">This is my attempt at what I hope could be a series of posts, where I talk through my process for doing something computational. If you like seeing problems being broken down and solved, whether you’re learning to do this, experienced with it, or just otherwise curious, I hope this is of interest!</summary></entry><entry><title type="html">Circuitmodelsjl</title><link href="http://localhost:4000/2021/05/01/circuitmodelsjl.html" rel="alternate" type="text/html" title="Circuitmodelsjl" /><published>2021-05-01T00:00:00-07:00</published><updated>2021-05-01T00:00:00-07:00</updated><id>http://localhost:4000/2021/05/01/circuitmodelsjl</id><content type="html" xml:base="http://localhost:4000/2021/05/01/circuitmodelsjl.html">&lt;h1 id=&quot;circuitmodelsjl&quot;&gt;CircuitModels.jl&lt;/h1&gt;
+&lt;p&gt;Circuit modeling and DAE setup in Julia. This code is largely based on the MAPP prototyping platform and the MNA equation engine written by Prof. Jaijeet Roychowdhury’s group.
+This package was originally written as a final project for EECS 219A at UC Berkeley in Spring 2021.&lt;/p&gt;
+
+&lt;h2 id=&quot;code-structure-summary&quot;&gt;Code Structure Summary&lt;/h2&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;examples
+ ┣ circuits                 - examples of how to build a circuit
+ ┃ ┣ BJTDiffPair.jl
+ ┃ ┣ NOTGate.jl
+ ┃ ┣ RCLine.jl
+ ┃ ┣ nStageRingOscillator.jl
+ ┃ ┗ vsrc.jl
+ ┣ mna                      - examples of how to make an MNA object from a circuit (each one line, structured for extensibility)
+ ┃ ┣ BJTDiffPair.jl
+ ┃ ┣ NOTGate.jl
+ ┃ ┣ RCLine.jl
+ ┃ ┣ nStageRingOscillator.jl
+ ┃ ┗ vsrc.jl
+ ┗ netlists                 - netlists to parse
+ ┃ ┣ diffpair.clr
+ ┃ ┣ mosfet_char.clr
+ ┃ ┗ rc.clr
+
+ src                            
+ ┣ circuitsystems           - circuit building and modeling functionality 
+ ┃ ┣ circuit.jl             - functions to build a circuit
+ ┃ ┣ circuitsystems.jl      - submodule to include the other two files and expose them to the rest of the package
+ ┃ ┗ mnasystem.jl           - functionality to do MNA from a circuit and run f/q
+ ┣ devices                  - definitions of individual devices
+ ┃ ┣ bjt.jl
+ ┃ ┣ capacitor.jl
+ ┃ ┣ devices.jl             - submodule to include all the device models and expose them to the rest of the package
+ ┃ ┣ diode.jl
+ ┃ ┣ inductor.jl
+ ┃ ┣ mosfet.jl
+ ┃ ┣ resistor.jl
+ ┃ ┣ sources.jl
+ ┃ ┣ switch.jl
+ ┃ ┗ utils.jl               - smoothif and unit checking
+ ┣ parser                   - netlist parsing functionality
+ ┃ ┣ parse_devices.jl       - functions to parse individual devices from a line of text in the netlist
+ ┃ ┣ parser.jl              - core parsing
+ ┃ ┗ utils.jl               - order of magnitude and device object lookups
+ ┣ systems
+ ┃ ┣ analysis.jl            - build DAEs from Systems
+ ┃ ┗ systems.jl             - include submodules that depend on the `System` object
+ ┗ CircuitModels.jl         - include all submodules
+ 
+ test
+ ┣ runtests.jl              - runs the other three files
+ ┣ test_circuit_builds.jl   - checks that all the circuits in &quot;examples&quot; can be conveted to MNA + f/q are callable
+ ┣ test_devices.jl          - checks device constructors, unit validity, and that fe/qe are callable
+ ┗ test_parser.jl           - checks that the netlists in &quot;examples/netlists&quot; can be parsed to circuits
+.gitignore
+LICENSE                     - MIT License, could be changed for public release
+Manifest.toml               - Julia-generated file listing all dependencies (machine-generated)
+Project.toml                - Julia-generated file listing direct dependencies (made via Julia REPL as packages are added)
+README.md                   - this file
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;running-the-code&quot;&gt;Running the Code&lt;/h2&gt;
+
+&lt;p&gt;This package requires Julia 1.6+, which can be downloaded from [https://julialang.org/downloads/].&lt;/p&gt;
+
+&lt;p&gt;Clone and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cd&lt;/code&gt; into this repository, and run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;julia&lt;/code&gt; from the command line at the top level (the current working directory should be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;CircuitModels.jl&lt;/code&gt;.) Then, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;]activate .&lt;/code&gt; (the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;]&lt;/code&gt; will become &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;@v1.6) pkg&amp;gt;&lt;/code&gt;), then backspace so that the REPL reads &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;julia&amp;gt;&lt;/code&gt; again and type &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;using CircuitModels&lt;/code&gt;. This will precompile the package and all of its dependencies, which may take a while the first time it’s run, although there should be a loading bar tracking the compiler’s progress. It should look like this:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type &quot;?&quot; for help, &quot;]?&quot; for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.6.0 (2021-03-24)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+|__/                   |
+
+(@v1.6) pkg&amp;gt; activate .
+  Activating environment at `~/projects/CircuitModels.jl/Project.toml`
+
+julia&amp;gt; using CircuitModels
+[ Info: Precompiling CircuitModels [cc1e6237-006d-4ed7-97b2-b8635ee6724d]
+
+julia&amp;gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;(Note that this isn’t the same procedure that’s used if the package in question is public; in that case, it’s possible to install a package by running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;]add &amp;lt;package_name_or_link&amp;gt;&lt;/code&gt; either from the name registered with the Julia package repository, or the GitHub link, similar to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pip&lt;/code&gt; installation in Python.)&lt;/p&gt;
+
+&lt;p&gt;To run all the tests in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;test/&lt;/code&gt; subdirectory, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;include(&quot;test/runtests.jl&quot;)&lt;/code&gt;, or any of the individual files as desired. This checks that all the devices, example circuits, and example netlists are successfully constructed. (Upon running these, optionally try running a second time and observe the speedup due to JIT!)&lt;/p&gt;
+
+&lt;p&gt;In order to load the constructed circuits in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;examples/circuits/&lt;/code&gt;, run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;include(&quot;examples/circuits/BJTDiffPair.jl&quot;)&lt;/code&gt; (or any of the other files provided). This will load a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Circuit&lt;/code&gt; object named &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BJTDiffPair_circuit&lt;/code&gt; (or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NOTGate_circuit&lt;/code&gt;, etc.).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; include(&quot;examples/circuits/BJTDiffPair.jl&quot;)
+
+julia&amp;gt; BJTDiffPair_circuit
+Circuit(BJT differential pair, [:gnd, :nBL, :nE, :nCL, :VDD, :nCR])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Modified nodal analysis is then carried out by calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MNASystem&lt;/code&gt;, e.g.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; BJTDiffPair = MNASystem(BJTDiffPair_circuit)
+Modified nodal analysis engine for BJT differential pair
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note that the standard MATLAB/IPython rules for suppressing output with semicolons applies here too.
+The MNA objects can also be obtained by directly running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;include(&quot;examples/mna/BJTDiffPair.jl&quot;)&lt;/code&gt;, or similar for the others.&lt;/p&gt;
+
+&lt;p&gt;The MNA objects include the underlying circuit object (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BJTDiffPair.circuit&lt;/code&gt;), information about the state variables (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BJTDiffPair.statenames&lt;/code&gt;), the unknowns (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BJTDiffPair.unames_array&lt;/code&gt;), and the equations being solved (&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;BJTDiffPair.eqn_names&lt;/code&gt;).&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; BJTDiffPair.circuit
+Circuit(BJT differential pair, [:gnd, :nBL, :nE, :nCL, :VDD, :nCR])
+
+julia&amp;gt; BJTDiffPair.statenames
+6-element Vector{String}:
+ &quot;v_nBL&quot;
+ &quot;v_nE&quot;
+ &quot;v_nCL&quot;
+ &quot;v_VDD&quot;
+ &quot;v_nCR&quot;
+ &quot;i_Vin@p&quot;
+
+julia&amp;gt; BJTDiffPair.unames_array
+2-element Vector{String}:
+ &quot;Vin::V&quot;
+ &quot;IE::i&quot;
+
+julia&amp;gt; BJTDiffPair.eqn_names
+6-element Vector{String}:
+ &quot;KCL@nBL&quot;
+ &quot;KCL@nE&quot;
+ &quot;KCL@nCL&quot;
+ &quot;KCL@VDD&quot;
+ &quot;KCL@nCR&quot;
+ &quot;fix V_Vin@1&quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The functions &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;f&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;q&lt;/code&gt; can then be called on the MNA objects, by running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;f(BJTDiffPair, x, u)&lt;/code&gt;. However, since the MNA equation engine is unit-aware, passing in vectors of unitless numbers will result in a unit error. To check the correct units for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;x&lt;/code&gt;, call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;state_units(BJTDiffPair)&lt;/code&gt;, and similarly for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;u&lt;/code&gt; call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;input_units(BJTDiffPair)&lt;/code&gt;. As is done in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;test/test_circuit_builds.jl&lt;/code&gt;, it is possible to construct a unit-aware vector from a vector of unitless numbers using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.*&lt;/code&gt; operator (multiplication broadcast over arrays), e.g.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; x = rand(6) .* state_units(BJTDiffPair)
+6-element Vector{Quantity{Float64, D, U} where {D, U}}:
+  0.8615763846864712 V
+ 0.04094620625121448 V
+  0.4266211206166659 V
+  0.7557126732061681 V
+  0.9195226664448348 V
+ 0.04112044475339349 A
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Further, the output of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;f&lt;/code&gt; should have the units in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;output_units(BJTDiffPair)&lt;/code&gt;, and the output of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;q&lt;/code&gt; should have those units multiplied by a unit of time.&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; u = rand(2) .* input_units(BJTDiffPair)
+2-element Vector{Quantity{Float64, D, U} where {D, U}}:
+ 0.7670477902394872 V
+ 0.3016086826622677 A
+
+julia&amp;gt; f(BJTDiffPair, x, u)
+6-element Vector{Quantity{Float64, D, U} where {D, U}}:
+   0.5510543964231576 A
+   -51.29411038942376 A
+   50.482403209317724 A
+ 8.264077967541773e-5 A
+ 8.190499483430076e-5 A
+ -0.09452859444698403 V
+
+julia&amp;gt; q(BJTDiffPair, x, u)
+6-element Vector{Quantity{Float64, D, U} where {D, U}}:
+  1.2555854425050623e-9 A s
+ -7.796839721840424e-10 A s
+   -3.29526507853572e-7 A s
+  1.6528155935083543e-7 A s
+  1.6472951590511157e-7 A s
+                    0.0 s V
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;The provided netlists can be parsed by calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;parse_netlist&lt;/code&gt; with the filename, for example,&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;julia&amp;gt; parse_netlist(&quot;examples/netlists/rc.cir&quot;)
+Circuit(RC circuit, [:n0, :n1, :n2])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Finally, this functionality is not fully developed yet, but it should be possible to call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dae_objective&lt;/code&gt;, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;make_dae_problem&lt;/code&gt;, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dcop&lt;/code&gt; with an &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MNASystem&lt;/code&gt; passed in as the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;System&lt;/code&gt; object.&lt;/p&gt;
+
+&lt;h2 id=&quot;limitations&quot;&gt;Limitations&lt;/h2&gt;
+
+&lt;p&gt;Problems and potential enhancements have mostly been logged in this repository under the GitHub Issues tracker and explained in more detail in the project report. In particular:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Netlist parsing has some limitations in handling advanced parameters&lt;/li&gt;
+  &lt;li&gt;Some devices have not been implemented&lt;/li&gt;
+  &lt;li&gt;The controlled source implementations have not been tested&lt;/li&gt;
+  &lt;li&gt;Tests of MNA on netlist-parsed circuits (rather than the explicitly-defined circuits in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;examples/circuits&lt;/code&gt;) have not been carried out&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;While the last one is likely not an issue (the netlist-parsed VSRC is exactly the same as the user-defined one) it may be a source of additional errors when more advanced netlist parsing is added.&lt;/p&gt;</content><author><name></name></author><summary type="html">CircuitModels.jl Circuit modeling and DAE setup in Julia. This code is largely based on the MAPP prototyping platform and the MNA equation engine written by Prof. Jaijeet Roychowdhury’s group. This package was originally written as a final project for EECS 219A at UC Berkeley in Spring 2021.</summary></entry><entry><title type="html">Current EECS 126 Content</title><link href="http://localhost:4000/2020/06/26/eecs126-fa20.html" rel="alternate" type="text/html" title="Current EECS 126 Content" /><published>2020-06-26T16:25:17-07:00</published><updated>2020-06-26T16:25:17-07:00</updated><id>http://localhost:4000/2020/06/26/eecs126-fa20</id><content type="html" xml:base="http://localhost:4000/2020/06/26/eecs126-fa20.html">&lt;p&gt;Click &lt;a href=&quot;https://tinyurl.com/yy79f8au&quot;&gt;here&lt;/a&gt; for my feedback form, to let me know what you like and what you’d like me to change about my discussion!&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;expository/markovtex.pdf&quot;&gt;Markov Chains in TeX&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/kf_derivation_intuition.pdf&quot;&gt;KF Derivation/Intuition&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/vector_kf_derivation.pdf&quot;&gt;Vector KF Derivation&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis1notes.pdf&quot;&gt;Discussion 1 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis2notes.pdf&quot;&gt;Discussion 2 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis3notes.pdf&quot;&gt;Discussion 3 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis4notes.pdf&quot;&gt;Discussion 4 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis5notes.pdf&quot;&gt;Discussion 5 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis6notes.pdf&quot;&gt;Discussion 6 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis8notes.pdf&quot;&gt;Discussion 8 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis9notes.pdf&quot;&gt;Discussion 9 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis10notes.pdf&quot;&gt;Discussion 10 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis11notes.pdf&quot;&gt;Discussion 11 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis12notes.pdf&quot;&gt;Discussion 12 Notes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;eecs126disnotes/126fa20dis13notes.pdf&quot;&gt;Discussion 13 Notes&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">Click here for my feedback form, to let me know what you like and what you’d like me to change about my discussion!</summary></entry></feed>
